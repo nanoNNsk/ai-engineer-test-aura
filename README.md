@@ -23,6 +23,26 @@ A production-ready Multi-tenant RAG (Retrieval-Augmented Generation) system buil
 ├── AI_PROMPTS.md         # AI prompts used for development
 └── MOCK_MODE.md          # Mock mode documentation
 ```
+## 🧠 Design & Engineering Decisions
+
+### A1. Problem Framing
+* **User:** Employees needing instant answers from internal documents (HR policies, technical specs).
+* **Decision:** They need to find specific information hidden inside large documents without knowing exact keywords.
+* **Why NOT Rule-based:** Keyword search fails on synonyms (e.g., "vacation" vs "annual leave"). Semantic search understands intent, which is critical for natural language queries.
+
+### B1. RAG Design (Data Strategy)
+* **Chunking:** Fixed-size chunking (1000 chars) with 200 char overlap to preserve context at boundaries.
+* **Retrieval:** Hybrid search strategy using `pgvector`.
+* **Tenant Isolation:** Enforced via `WHERE tenant_id = :tid` clause on **every** vector search query to prevent data leakage between clients.
+
+### C1. Cost Control Strategy
+* **Caching:** Implemented Redis caching (TTL 1 hour) for identical queries within the same tenant. This prevents redundant LLM calls for frequently asked questions.
+* **Mock Mode:** Added a deterministic mock mode for development/testing to save costs during the build phase.
+
+### E. Execution Reality Check
+1.  **What to ship in 2 weeks:** The current Backend API with added JWT Authentication and a basic Retool/Streamlit admin dashboard.
+2.  **What NOT to build yet:** Complex PDF parsing (OCR) or custom fine-tuned embedding models (use off-the-shelf OpenAI for now).
+3.  **Biggest Risk:** LLM Hallucination on numerical data (mitigated by enforcing strict source citations in the System Prompt).
 
 ## 🎯 Approach & Design Decisions
 
