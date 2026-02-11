@@ -3,7 +3,7 @@
 A production-ready Multi-tenant RAG (Retrieval-Augmented Generation) system built with FastAPI, PostgreSQL (pgvector), Redis, and OpenAI. Features strict tenant isolation, intelligent caching, and mandatory source citations.
 
 # ข้อความจากผู้เขียน
-ผมใช้ kiro ในการ coding เนื่องจากระยะเวลาที่จำกัด ผมจึงใช้ agent ในการเขียน code ตลอดกระบวนการ ทั้งการเขียน api โดยใช้ fastapi ,การ mock เส้น openai api key,การ embedding โดยใช้ sha256 
+ผมใช้ kiro ในการ coding เนื่องจากระยะเวลาที่จำกัด ผมจึงใช้ agent ในการเขียน code ตลอดกระบวนการ ทั้งการเขียน api โดยใช้ fastapi ,การ mock เส้น openai api key,การ embedding โดยใช้ sha256 รวมถึงการวางแผนในการขึ้นโครง project นี้เเละการตอบคำถาม ผมใช้ gemini ในการออกเเบบ prompt สำหรับการใช้ kiro ด้วยเช่นกัน ปัญหาบางอย่างก็ใช้ gemini ในการเเก้ปัญหาอย่างเช่นการตัดสินใจว่าขั้นตอนการทำงานที่ kiro เสนอเป็นทางที่เร็วเเละพอสำหรับการสอบครั้งนี้มั้ย 
 
 ## 📁 Project Structure
 
@@ -23,7 +23,7 @@ A production-ready Multi-tenant RAG (Retrieval-Augmented Generation) system buil
 ├── docker-compose.yml    # Docker services configuration
 ├── test_docker_startup.py # Startup verification script
 ├── README.md             # This file
-├── AI_PROMPTS.md         # AI prompts used for development
+├── AI_PROMPTS.md         # AI prompts, iterations, accepted/rejected outputs, human judgment notes
 └── MOCK_MODE.md          # Mock mode documentation
 ```
 ## 🧠 Design & Engineering Decisions
@@ -35,17 +35,17 @@ A production-ready Multi-tenant RAG (Retrieval-Augmented Generation) system buil
 
 ### B1. RAG Design (Data Strategy)
 * **Chunking:** Fixed-size chunking (1000 chars) with 200 char overlap to preserve context at boundaries.
-* **Retrieval:** Hybrid search strategy using `pgvector`.
-* **Tenant Isolation:** Enforced via `WHERE tenant_id = :tid` clause on **every** vector search query to prevent data leakage between clients.
+* **Retrieval:** Semantic search using `pgvector` with cosine distance (`<=>` operator). ไม่ใช่ hybrid search แต่เป็น pure vector similarity search.
+* **Tenant Isolation:** Enforced via `WHERE tenant_id = :tenant_id` clause on **every** vector search query to prevent data leakage between clients.
 
 ### C1. Cost Control Strategy
-* **Caching:** Implemented Redis caching (TTL 1 hour) for identical queries within the same tenant. This prevents redundant LLM calls for frequently asked questions.
-* **Mock Mode:** Added a deterministic mock mode for development/testing to save costs during the build phase.
+* **Caching:** Implemented Redis caching (TTL 1 hour) for identical queries within the same tenant. Cache key format: `query:{tenant_id}:{sha256_hash[:16]}` เพื่อป้องกัน cross-tenant pollution.
+* **Mock Mode:** ใช้ SHA256 hash เป็น seed สำหรับสร้าง deterministic embeddings (1536 dimensions) และ mock LLM responses เพื่อทดสอบโดยไม่เสียค่าใช้จ่าย OpenAI API.
 
 ### E. Execution Reality Check
-1.  **What to ship in 2 weeks:** The current Backend API with added JWT Authentication and a basic Retool/Streamlit admin dashboard.
-2.  **What NOT to build yet:** Complex PDF parsing (OCR) or custom fine-tuned embedding models (use off-the-shelf OpenAI for now).
-3.  **Biggest Risk:** LLM Hallucination on numerical data (mitigated by enforcing strict source citations in the System Prompt).
+1.  **What was shipped:** Backend API ที่สมบูรณ์พร้อม Docker containerization, Mock Mode สำหรับทดสอบฟรี, และ E2E test script. ไม่มี JWT Authentication หรือ admin dashboard (ยังไม่ได้ทำ).
+2.  **What was NOT built:** JWT Authentication, Admin dashboard, PDF parsing (OCR), custom fine-tuned embedding models, Tenant management API endpoints.
+3.  **Biggest Risk:** LLM Hallucination on numerical data (mitigated by enforcing strict source citations in the System Prompt และ context-only responses).
 
 ## 🎯 Approach & Design Decisions
 
@@ -320,7 +320,7 @@ docker compose logs backend | findstr "MOCK"
 ## 📚 Additional Documentation
 
 - **MOCK_MODE.md**: Detailed guide on using the system without OpenAI API costs
-- **AI_PROMPTS.md**: Complete record of AI prompts used to build this system
+- **AI_PROMPTS.md**: บันทึก AI prompts ที่ใช้พัฒนาระบบ รวมถึง iterations, outputs ที่ถูกต้อง/ผิดพลาด, และเหตุผลที่ต้องใช้ human judgment
 - **setup.md**: Quick setup guide (Thai language)
 
 ## 🔧 Tech Stack
