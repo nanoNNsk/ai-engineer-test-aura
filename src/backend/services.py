@@ -181,7 +181,7 @@ class IngestService:
             document = Document(
                 tenant_id=tenant_id,
                 content=content,
-                metadata=metadata
+                doc_metadata=metadata  # Changed from metadata to doc_metadata
             )
             db.add(document)
             await db.flush()

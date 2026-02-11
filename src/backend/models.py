@@ -20,7 +20,7 @@ class Document(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     tenant_id = Column(UUID(as_uuid=True), ForeignKey("tenants.id", ondelete="CASCADE"), nullable=False, index=True)
     content = Column(Text, nullable=False)
-    metadata = Column(JSONB, nullable=True)
+    doc_metadata = Column(JSONB, nullable=True)  # Changed from 'metadata' to 'doc_metadata'
     created_at = Column(DateTime, default=datetime.utcnow)
     
     __table_args__ = (

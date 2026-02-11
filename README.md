@@ -2,6 +2,9 @@
 
 A production-ready Multi-tenant RAG (Retrieval-Augmented Generation) system built with FastAPI, PostgreSQL (pgvector), Redis, and OpenAI. Features strict tenant isolation, intelligent caching, and mandatory source citations.
 
+# ข้อความจากผู้เขียน
+ผมใช้ kiro ในการ coding เนื่องจากระยะเวลาที่จำกัด ผมจึงใช้ agent ในการเขียน code ตลอดกระบวนการ ทั้งการเขียน api โดยใช้ fastapi ,การ mock เส้น openai api key,การ embedding โดยใช้ sha256 
+
 ## 📁 Project Structure
 
 ```
