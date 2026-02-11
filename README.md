@@ -321,7 +321,6 @@ docker compose logs backend | findstr "MOCK"
 
 - **MOCK_MODE.md**: Detailed guide on using the system without OpenAI API costs
 - **AI_PROMPTS.md**: บันทึก AI prompts ที่ใช้พัฒนาระบบ รวมถึง iterations, outputs ที่ถูกต้อง/ผิดพลาด, และเหตุผลที่ต้องใช้ human judgment
-- **setup.md**: Quick setup guide (Thai language)
 
 ## 🔧 Tech Stack
 
